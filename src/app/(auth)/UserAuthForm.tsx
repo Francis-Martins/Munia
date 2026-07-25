@@ -29,41 +29,79 @@ export function UserAuthForm({ mode }: { mode: 'login' | 'register' }) {
     setEmail(text);
   }, []);
 
+  // const submitEmail = useCallback(async () => {
+  //   setLoading((prev) => ({
+  //     ...prev,
+  //     email: true,
+  //   }));
+
+  //   const validateEmail = emailSchema.safeParse(email);
+  //   if (validateEmail.success) {
+  //     const signInResult = await signIn('email', {
+  //       email: email.toLowerCase(),
+  //       redirect: false,
+  //       callbackUrl,
+  //     });
+
+  //     setLoading((prev) => ({
+  //       ...prev,
+  //       email: false,
+  //     }));
+  //     if (!signInResult?.ok) {
+  //       showToast({ type: 'error', title: 'Something went wrong' });
+  //       return;
+  //     }
+  //     showToast({
+  //       type: 'success',
+  //       title: 'Email Sent',
+  //       message: 'Please check your email to sign in.',
+  //     });
+  //   } else {
+  //     setInputError(validateEmail.error.issues[0].message);
+  //     setLoading((prev) => ({
+  //       ...prev,
+  //       email: false,
+  //     }));
+  //   }
+  // }, [email, callbackUrl, showToast]);
+
+
+
   const submitEmail = useCallback(async () => {
+  setLoading((prev) => ({
+    ...prev,
+    email: true,
+  }));
+
+  const validateEmail = emailSchema.safeParse(email);
+  if (validateEmail.success) {
+    const signInResult = await signIn('email', {
+      email: email.toLowerCase(),
+      redirect: false,
+      callbackUrl,
+    });
+
     setLoading((prev) => ({
       ...prev,
-      email: true,
+      email: false,
     }));
 
-    const validateEmail = emailSchema.safeParse(email);
-    if (validateEmail.success) {
-      const signInResult = await signIn('email', {
-        email: email.toLowerCase(),
-        redirect: false,
-        callbackUrl,
-      });
-
-      setLoading((prev) => ({
-        ...prev,
-        email: false,
-      }));
-      if (!signInResult?.ok) {
-        showToast({ type: 'error', title: 'Something went wrong' });
-        return;
-      }
-      showToast({
-        type: 'success',
-        title: 'Email Sent',
-        message: 'Please check your email to sign in.',
-      });
-    } else {
-      setInputError(validateEmail.error.issues[0].message);
-      setLoading((prev) => ({
-        ...prev,
-        email: false,
-      }));
+    if (!signInResult?.ok) {
+      showToast({ type: 'error', title: 'Something went wrong' });
+      return;
     }
-  }, [email, callbackUrl, showToast]);
+
+    window.location.href = signInResult.url ?? callbackUrl;
+  } else {
+    setInputError(validateEmail.error.issues[0].message);
+    setLoading((prev) => ({
+      ...prev,
+      email: false,
+    }));
+  }
+}, [email, callbackUrl, showToast]);
+
+
 
   const signInWithProvider = useCallback(
     (provider: 'github' | 'google' | 'facebook') => async () => {
